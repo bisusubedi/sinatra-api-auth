@@ -1,21 +1,26 @@
 require 'sinatra'
 
-module Sinatra::ApiAUth
+module Sinatra::ApiAuth
 
   def self.registered(app)
     # Hang on to our application instance, so we can add settings later
-    @app = app
+    @@app = app
+  end
+
+  def api_auth_with(hash)
+
+    @@app.set :api_auth, hash
   end
 
   # Sets the method used to perform authentication checks. The method must take
   # one argument, the token, and return a boolean.
   def api_auth_method(api_auth_method)
-    @app.set :api_auth_method, auth_method
+    @@app.set :api_auth_method, api_auth_method
   end
 
   # Sets the request parameter to use as the API token
   def api_auth_token(api_auth_token)
-    @app.set :api_auth_token
+    @@app.set :api_auth_token, api_auth_token
   end
 
   # Require authentication for the given routes. If authentication fails, then
@@ -24,11 +29,14 @@ module Sinatra::ApiAUth
   def requires_api_auth(*routes)
     routes.each do |route|
       before route do
-        method = settings[:api_auth_method]
-        token  = settings[:api_auth_token]
+        method = settings.api_auth[:method]
+        token  = settings.api_auth[:token]
 
-        if not send(method, token)
+        if not send(method, request[token])
+          logger.info "Authentication request for #{request.path_info} failed"
           halt 403
+        else
+          logger.info "Authentication request for #{request.path_info} succeeded"
         end
       end
     end
