@@ -8,7 +8,7 @@ module Sinatra::ApiAuth
   end
 
   def api_auth_with(hash)
-
+    # TODO: validate input
     @@app.set :api_auth, hash
   end
 
