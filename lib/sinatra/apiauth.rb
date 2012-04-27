@@ -33,10 +33,10 @@ module Sinatra::ApiAuth
         token  = settings.api_auth[:token]
 
         if not send(method, request[token])
-          logger.info "Authentication request for #{request.path_info} failed"
+          logger.debug "Authentication request for #{request.path_info} failed"
           halt 403
         else
-          logger.info "Authentication request for #{request.path_info} succeeded"
+          logger.debug "Authentication request for #{request.path_info} succeeded"
         end
       end
     end
