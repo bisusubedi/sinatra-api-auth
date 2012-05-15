@@ -1,12 +1,25 @@
 require 'sinatra'
 
 module Sinatra::ApiAuth
+  # Add REST endpoint protection using API keys. Given a method that takes
+  # an API key as an argument and determines if that user is allowed access,
+  # you can quickly wrap actions with auth.
+  #
+  # Example:
+  #
+  #   register Sinatra::ApiAuth
+  #
+  #   api_auth_with :method => :authenticate, :token => :token
+  #   requires_api_auth '/my/protected/url', %r[/my/regex.*/url]
+
 
   def self.registered(app)
     # Hang on to our application instance, so we can add settings later
     @@app = app
   end
 
+  # Register the method to be called that can provide authentication. The
+  # method needs to be an instance method.
   def api_auth_with(hash)
     # TODO: validate input
     @@app.set :api_auth, hash
@@ -27,6 +40,8 @@ module Sinatra::ApiAuth
   # routing is halted and a 403 is returned. A 403 error handler can be added
   # to customize what exactly is returned.
   def requires_api_auth(*routes)
+    # TODO ensure that the method and token are defined and valid before the
+    # before filters are added
     routes.each do |route|
       before route do
         method = settings.api_auth[:method]
